@@ -1,0 +1,119 @@
+{
+  "ollama_model": "llama3.2:latest",
+  "max_radar_charts": 4,
+  "ui": {
+    "app_title": "Family Reflection Map",
+    "intro_title": "A shared space for reflection",
+    "intro_text": "This experience helps family members reflect on misunderstandings linked to communication and generational perspectives.",
+    "intro_button": "Start",
+    "privacy_title": "Privacy and participation",
+    "privacy_text": "Each participant responds independently. Inputs are personal perspectives and are not treated as objective truth. Responses are stored in structured form for comparison.",
+    "privacy_agree": "I agree",
+    "privacy_decline": "I do not agree",
+    "privacy_decline_message": "The interaction has ended because consent was not provided.",
+    "profile_title": "Participant profile",
+    "questions_title": "Reflective questions",
+    "submit_participant": "Save participant",
+    "add_member": "Add another member",
+    "we_are_ready": "We are ready",
+    "member_saved": "Participant saved independently.",
+    "ready_title": "Collection checkpoint",
+    "ready_text": "You can add another participant or continue to analysis.",
+    "analysis_title": "Relational map output",
+    "shared_patterns_title": "Shared patterns",
+    "gaps_title": "Differences in intensity",
+    "external_title": "Comparison with previous family groups",
+    "feedback_title": "Final reflection",
+    "feedback_question": "Did this help you reflect?",
+    "feedback_placeholder": "Optional note",
+    "feedback_submit": "Save feedback",
+    "restart": "Start over",
+    "loading": "Processing...",
+    "max_charts_note": "Only the first {max_radar_charts} radar charts are displayed.",
+    "messages": {
+      "network_error": "Request failed. Please try again.",
+      "participant_validation_error": "Please complete all profile fields and all three answers.",
+      "disengaged_input": "Your input seems unrelated or not sufficiently engaged with the reflective questions. Please continue only if you are willing to engage meaningfully. AI processing consumes energy.",
+      "no_participants": "Add at least one participant before analysis.",
+      "feedback_saved": "Feedback saved.",
+      "session_reset": "Session restarted."
+    },
+    "labels": {
+      "role": "Role (parent/child)",
+      "generation": "Generation",
+      "family_role": "Family role"
+    }
+  },
+  "questions": {
+    "misunderstood": "When did you recently feel misunderstood in your family, and what do you think happened?",
+    "missing": "What do you feel is missing in your family communication right now?",
+    "wish": "What do you wish others in your family could better understand about your perspective?"
+  },
+  "prompts": {
+    "engagement_system_prompt": "You are a strict validation assistant. Stay neutral and evaluate relevance and engagement only.",
+    "engagement_check_prompt": "Evaluate whether the participant answers are relevant to the three reflective family questions and show meaningful engagement. Return only valid JSON with keys: is_relevant (boolean), is_engaged (boolean), reason (string). Participant metadata: role={role}, generation={generation}, family_role={family_role}. Questions: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. Answers JSON: {answers_json}.",
+    "analysis_system_prompt": "You are a neutral reflection mapper. Do not assign blame, advice, or judgment.",
+    "analysis_prompt": "Map the participant text into the provided categories and return only valid JSON. Scale each category score from 0 to 10. Keep all keys exactly as provided. Also include extracted keywords (list of strings) and sentiment (number between -1 and 1). Participant metadata: role={role}, generation={generation}, family_role={family_role}. Questions: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. Answers JSON: {answers_json}. Use these category templates exactly. Basic emotions template: {basic_emotions_template}. Derived emotions template: {derived_emotions_template}. Mental states template: {mental_states_template}. Relational needs template: {relational_needs_template}. Output schema: {\"basic_emotions\": {...}, \"derived_emotions\": {...}, \"mental_states\": {...}, \"relational_needs\": {...}, \"keywords\": [], \"sentiment\": 0.0}",
+    "external_comparison_prompt": "Summarize the comparison between current family aggregate scores and historical aggregate scores in a neutral way. Return only valid JSON with keys: alignment (array of strings), divergence (array of strings), note (string). Current aggregate: {current_aggregate_json}. Historical aggregate: {historical_aggregate_json}."
+  },
+  "analysis_categories": {
+    "basic_emotions": {
+      "Joy": 0,
+      "Sadness": 0,
+      "Anger": 0,
+      "Fear": 0,
+      "Disgust": 0,
+      "Surprise": 0
+    },
+    "derived_emotions": {
+      "Enthusiasm": 0,
+      "Gratitude": 0,
+      "Pride": 0,
+      "Love": 0,
+      "Satisfaction": 0,
+      "Relief": 0,
+      "Affliction": 0,
+      "Loneliness": 0,
+      "Despair": 0,
+      "Disappointment": 0,
+      "Nostalgia": 0,
+      "Frustration": 0,
+      "Impatience": 0,
+      "Resentment": 0,
+      "Anxiety": 0,
+      "Insecurity": 0,
+      "Stress": 0,
+      "Panic": 0,
+      "Worry": 0,
+      "Shame": 0,
+      "Guilt": 0,
+      "Jealousy": 0,
+      "Envy": 0,
+      "Helplessness": 0
+    },
+    "mental_states": {
+      "Overthinking": 0,
+      "Confusion": 0,
+      "Apathy": 0,
+      "Boredom": 0,
+      "Mental fatigue": 0,
+      "Indifference": 0,
+      "Disinterest": 0,
+      "Uncertainty": 0,
+      "Dissociation / detachment": 0,
+      "Feeling overwhelmed": 0
+    },
+    "relational_needs": {
+      "Feeling heard": 0,
+      "Feeling understood": 0,
+      "Feeling accepted": 0,
+      "Feeling valued": 0,
+      "Feeling safe": 0,
+      "Feeling free to be yourself": 0,
+      "Empathy": 0,
+      "Connection": 0,
+      "Authentic dialogue": 0,
+      "Belonging": 0
+    }
+  }
+}

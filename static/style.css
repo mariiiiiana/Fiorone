@@ -1,0 +1,120 @@
+:root {
+  --font: "Georgia", serif;
+  --bg: #f8f8f8;
+  --text: #1a1a1a;
+  --border: #d5d5d5;
+  --panel: #ffffff;
+  --gap: 12px;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  padding: 24px 16px;
+}
+
+#app {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.row {
+  display: flex;
+  gap: var(--gap);
+  flex-wrap: wrap;
+}
+
+.row > * {
+  flex: 1 1 220px;
+}
+
+button {
+  background: #f2f2f2;
+  cursor: pointer;
+}
+
+.muted {
+  color: #666;
+  font-size: 0.92rem;
+}
+
+.list {
+  margin-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.chart-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.status {
+  min-height: 20px;
+}
+
+@media (max-width: 680px) {
+  body {
+    padding: 14px 10px;
+  }
+
+  .panel {
+    padding: 12px;
+  }
+}
