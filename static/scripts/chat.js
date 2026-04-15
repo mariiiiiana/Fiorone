@@ -23,6 +23,32 @@ function createLabeledInput(labelText, name, isArea) {
   return { label: label, field: field };
 }
 
+function createLabeledSelect(labelText, name, options) {
+  var label = makeElement("label", "");
+  label.textContent = labelText;
+
+  var field = document.createElement("select");
+  field.name = name;
+  field.required = true;
+
+  var placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select an option";
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  field.appendChild(placeholder);
+
+  (options || []).forEach(function (option) {
+    var optionNode = document.createElement("option");
+    optionNode.value = option.value;
+    optionNode.textContent = option.label;
+    field.appendChild(optionNode);
+  });
+
+  label.appendChild(field);
+  return { label: label, field: field };
+}
+
 function drawRadarChart(container, radarValues, title) {
   var dimensions = [
     { key: "basic_emotions", label: "Basic emotions" },

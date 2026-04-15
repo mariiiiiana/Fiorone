@@ -1,6 +1,7 @@
 """Backend for multi-participant family reflection mapping."""
 
 import json
+import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +20,7 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 
 SETTINGS = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
 OLLAMA_MODEL = SETTINGS["ollama_model"]
+STRICT_ENGAGEMENT_VALIDATION = bool(SETTINGS.get("strict_engagement_validation", False))
 
 
 def utc_now_iso() -> str:
@@ -43,7 +45,13 @@ class SafeTemplateDict(dict):
 
 
 def format_prompt(template: str, variables: dict[str, Any]) -> str:
-    return template.format_map(SafeTemplateDict({k: v for k, v in variables.items()}))
+    def replace_match(match: re.Match[str]) -> str:
+        key = match.group(1)
+        if key in variables:
+            return str(variables[key])
+        return match.group(0)
+
+    return re.sub(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}", replace_match, template)
 
 
 def read_history() -> list[dict[str, Any]]:
@@ -171,13 +179,15 @@ def compute_overlaps_and_gaps(participants: list[dict[str, Any]]) -> dict[str, l
     return {"overlaps": overlaps, "gaps": gaps}
 
 
-async def call_ollama(prompt: str, system_prompt: str) -> str:
+async def call_ollama(prompt: str, system_prompt: str, response_format: Any | None = None) -> str:
     payload = {
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "system": system_prompt,
         "stream": False,
     }
+    if response_format is not None:
+        payload["format"] = response_format
 
     async with httpx.AsyncClient(timeout=60) as client:
         response = await client.post(OLLAMA_URL, json=payload)
@@ -212,12 +222,24 @@ async def validate_participant_input(payload: dict[str, Any]) -> dict[str, Any]:
     }
     prompt = format_prompt(SETTINGS["prompts"]["engagement_check_prompt"], variables)
     system_prompt = SETTINGS["prompts"]["engagement_system_prompt"]
+    response_format = SETTINGS["response_schemas"]["engagement"]
 
     try:
-        model_output = await call_ollama(prompt, system_prompt)
-        parsed = parse_json_from_text(model_output) or {}
-        is_relevant = bool(parsed.get("is_relevant", False))
-        is_engaged = bool(parsed.get("is_engaged", False))
+        model_output = await call_ollama(prompt, system_prompt, response_format=response_format)
+        parsed = parse_json_from_text(model_output)
+
+        # If the model does not return the expected schema, fallback to local validation
+        # instead of rejecting the participant with a false 422.
+        if not parsed:
+            return baseline_validation(answers)
+
+        raw_relevant = parsed.get("is_relevant")
+        raw_engaged = parsed.get("is_engaged")
+        if not isinstance(raw_relevant, bool) or not isinstance(raw_engaged, bool):
+            return baseline_validation(answers)
+
+        is_relevant = raw_relevant
+        is_engaged = raw_engaged
         reason = str(parsed.get("reason", ""))
         return {
             "is_relevant": is_relevant,
@@ -258,9 +280,10 @@ async def analyze_participant(payload: dict[str, Any]) -> dict[str, Any]:
     }
     prompt = format_prompt(SETTINGS["prompts"]["analysis_prompt"], variables)
     system_prompt = SETTINGS["prompts"]["analysis_system_prompt"]
+    response_format = SETTINGS["response_schemas"]["analysis"]
 
     try:
-        model_output = await call_ollama(prompt, system_prompt)
+        model_output = await call_ollama(prompt, system_prompt, response_format=response_format)
         parsed = parse_json_from_text(model_output) or {}
     except (httpx.HTTPError, json.JSONDecodeError):
         parsed = {}
@@ -362,9 +385,10 @@ async def compare_external_with_ollama(
     }
     prompt = format_prompt(SETTINGS["prompts"]["external_comparison_prompt"], variables)
     system_prompt = SETTINGS["prompts"]["analysis_system_prompt"]
+    response_format = SETTINGS["response_schemas"]["external_comparison"]
 
     try:
-        model_output = await call_ollama(prompt, system_prompt)
+        model_output = await call_ollama(prompt, system_prompt, response_format=response_format)
         parsed = parse_json_from_text(model_output) or {}
     except (httpx.HTTPError, json.JSONDecodeError, KeyError):
         return fallback
@@ -406,6 +430,7 @@ app = FastAPI()
 async def app_config() -> dict[str, Any]:
     return {
         "ui": SETTINGS["ui"],
+        "profile_options": SETTINGS.get("profile_options", {}),
         "questions": SETTINGS["questions"],
         "max_radar_charts": SETTINGS.get("max_radar_charts", 4),
     }
@@ -437,7 +462,8 @@ async def add_participant(request: ParticipantRequest) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="All answers are required")
 
     validation = await validate_participant_input(payload)
-    if not (validation["is_relevant"] and validation["is_engaged"]):
+    is_validation_ok = validation["is_relevant"] and validation["is_engaged"]
+    if STRICT_ENGAGEMENT_VALIDATION and not is_validation_ok:
         raise HTTPException(
             status_code=422,
             detail={
@@ -463,7 +489,11 @@ async def add_participant(request: ParticipantRequest) -> dict[str, Any]:
         "ok": True,
         "participant_id": participant["id"],
         "participant_count": len(CURRENT_SESSION["participants"]),
-        "message": SETTINGS["ui"]["member_saved"],
+        "message": (
+            SETTINGS["ui"]["messages"]["disengaged_input"]
+            if not is_validation_ok
+            else SETTINGS["ui"]["member_saved"]
+        ),
     }
 
 

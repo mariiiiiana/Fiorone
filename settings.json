@@ -1,5 +1,6 @@
 {
   "ollama_model": "llama3.2:latest",
+  "strict_engagement_validation": false,
   "max_radar_charts": 4,
   "ui": {
     "app_title": "Family Reflection Map",
@@ -44,6 +45,28 @@
       "family_role": "Family role"
     }
   },
+  "profile_options": {
+    "role": [
+      {"label": "Parent", "value": "Parent"},
+      {"label": "Child", "value": "Child"}
+    ],
+    "generation": [
+      {"label": "Generation Z (approximately 1997–2012)", "value": "Generation Z (approximately 1997–2012)"},
+      {"label": "Millennials (approximately 1981–1996)", "value": "Millennials (approximately 1981–1996)"},
+      {"label": "Generation X (approximately 1965–1980)", "value": "Generation X (approximately 1965–1980)"},
+      {"label": "Baby Boomers (approximately 1946–1964)", "value": "Baby Boomers (approximately 1946–1964)"},
+      {"label": "Other", "value": "Other"}
+    ],
+    "family_role": [
+      {"label": "Mother", "value": "Mother"},
+      {"label": "Father", "value": "Father"},
+      {"label": "Older daughter", "value": "Older daughter"},
+      {"label": "Younger son", "value": "Younger son"},
+      {"label": "Grandmother", "value": "Grandmother"},
+      {"label": "Grandfather", "value": "Grandfather"},
+      {"label": "Other", "value": "Other"}
+    ]
+  },
   "questions": {
     "misunderstood": "When did you recently feel misunderstood in your family, and what do you think happened?",
     "missing": "What do you feel is missing in your family communication right now?",
@@ -55,6 +78,124 @@
     "analysis_system_prompt": "You are a neutral reflection mapper. Do not assign blame, advice, or judgment.",
     "analysis_prompt": "Map the participant text into the provided categories and return only valid JSON. Scale each category score from 0 to 10. Keep all keys exactly as provided. Also include extracted keywords (list of strings) and sentiment (number between -1 and 1). Participant metadata: role={role}, generation={generation}, family_role={family_role}. Questions: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. Answers JSON: {answers_json}. Use these category templates exactly. Basic emotions template: {basic_emotions_template}. Derived emotions template: {derived_emotions_template}. Mental states template: {mental_states_template}. Relational needs template: {relational_needs_template}. Output schema: {\"basic_emotions\": {...}, \"derived_emotions\": {...}, \"mental_states\": {...}, \"relational_needs\": {...}, \"keywords\": [], \"sentiment\": 0.0}",
     "external_comparison_prompt": "Summarize the comparison between current family aggregate scores and historical aggregate scores in a neutral way. Return only valid JSON with keys: alignment (array of strings), divergence (array of strings), note (string). Current aggregate: {current_aggregate_json}. Historical aggregate: {historical_aggregate_json}."
+  },
+  "response_schemas": {
+    "engagement": {
+      "type": "object",
+      "properties": {
+        "is_relevant": {"type": "boolean"},
+        "is_engaged": {"type": "boolean"},
+        "reason": {"type": "string"}
+      },
+      "required": ["is_relevant", "is_engaged", "reason"],
+      "additionalProperties": false
+    },
+    "analysis": {
+      "type": "object",
+      "properties": {
+        "basic_emotions": {
+          "type": "object",
+          "properties": {
+            "Joy": {"type": "number"},
+            "Sadness": {"type": "number"},
+            "Anger": {"type": "number"},
+            "Fear": {"type": "number"},
+            "Disgust": {"type": "number"},
+            "Surprise": {"type": "number"}
+          },
+          "required": ["Joy", "Sadness", "Anger", "Fear", "Disgust", "Surprise"],
+          "additionalProperties": false
+        },
+        "derived_emotions": {
+          "type": "object",
+          "properties": {
+            "Enthusiasm": {"type": "number"},
+            "Gratitude": {"type": "number"},
+            "Pride": {"type": "number"},
+            "Love": {"type": "number"},
+            "Satisfaction": {"type": "number"},
+            "Relief": {"type": "number"},
+            "Affliction": {"type": "number"},
+            "Loneliness": {"type": "number"},
+            "Despair": {"type": "number"},
+            "Disappointment": {"type": "number"},
+            "Nostalgia": {"type": "number"},
+            "Frustration": {"type": "number"},
+            "Impatience": {"type": "number"},
+            "Resentment": {"type": "number"},
+            "Anxiety": {"type": "number"},
+            "Insecurity": {"type": "number"},
+            "Stress": {"type": "number"},
+            "Panic": {"type": "number"},
+            "Worry": {"type": "number"},
+            "Shame": {"type": "number"},
+            "Guilt": {"type": "number"},
+            "Jealousy": {"type": "number"},
+            "Envy": {"type": "number"},
+            "Helplessness": {"type": "number"}
+          },
+          "required": ["Enthusiasm", "Gratitude", "Pride", "Love", "Satisfaction", "Relief", "Affliction", "Loneliness", "Despair", "Disappointment", "Nostalgia", "Frustration", "Impatience", "Resentment", "Anxiety", "Insecurity", "Stress", "Panic", "Worry", "Shame", "Guilt", "Jealousy", "Envy", "Helplessness"],
+          "additionalProperties": false
+        },
+        "mental_states": {
+          "type": "object",
+          "properties": {
+            "Overthinking": {"type": "number"},
+            "Confusion": {"type": "number"},
+            "Apathy": {"type": "number"},
+            "Boredom": {"type": "number"},
+            "Mental fatigue": {"type": "number"},
+            "Indifference": {"type": "number"},
+            "Disinterest": {"type": "number"},
+            "Uncertainty": {"type": "number"},
+            "Dissociation / detachment": {"type": "number"},
+            "Feeling overwhelmed": {"type": "number"}
+          },
+          "required": ["Overthinking", "Confusion", "Apathy", "Boredom", "Mental fatigue", "Indifference", "Disinterest", "Uncertainty", "Dissociation / detachment", "Feeling overwhelmed"],
+          "additionalProperties": false
+        },
+        "relational_needs": {
+          "type": "object",
+          "properties": {
+            "Feeling heard": {"type": "number"},
+            "Feeling understood": {"type": "number"},
+            "Feeling accepted": {"type": "number"},
+            "Feeling valued": {"type": "number"},
+            "Feeling safe": {"type": "number"},
+            "Feeling free to be yourself": {"type": "number"},
+            "Empathy": {"type": "number"},
+            "Connection": {"type": "number"},
+            "Authentic dialogue": {"type": "number"},
+            "Belonging": {"type": "number"}
+          },
+          "required": ["Feeling heard", "Feeling understood", "Feeling accepted", "Feeling valued", "Feeling safe", "Feeling free to be yourself", "Empathy", "Connection", "Authentic dialogue", "Belonging"],
+          "additionalProperties": false
+        },
+        "keywords": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "sentiment": {"type": "number"}
+      },
+      "required": ["basic_emotions", "derived_emotions", "mental_states", "relational_needs", "keywords", "sentiment"],
+      "additionalProperties": false
+    },
+    "external_comparison": {
+      "type": "object",
+      "properties": {
+        "alignment": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "divergence": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "note": {"type": "string"}
+      },
+      "required": ["alignment", "divergence", "note"],
+      "additionalProperties": false
+    }
   },
   "analysis_categories": {
     "basic_emotions": {

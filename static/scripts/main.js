@@ -64,14 +64,30 @@ function renderParticipantForm() {
   panel.appendChild(makeElement("h2", "", t("ui.profile_title")));
 
   var form = makeElement("form", "stack");
+  var profileOptions = state.config.profile_options || {};
 
-  var roleInput = createLabeledInput(t("ui.labels.role"), "role", false);
-  var generationInput = createLabeledInput(t("ui.labels.generation"), "generation", false);
-  var familyRoleInput = createLabeledInput(t("ui.labels.family_role"), "family_role", false);
+  var roleInput = createLabeledSelect(t("ui.labels.role"), "role", profileOptions.role || []);
+  var generationInput = createLabeledSelect(
+    t("ui.labels.generation"),
+    "generation",
+    profileOptions.generation || []
+  );
+  var familyRoleInput = createLabeledSelect(
+    t("ui.labels.family_role"),
+    "family_role",
+    profileOptions.family_role || []
+  );
 
   form.appendChild(roleInput.label);
   form.appendChild(generationInput.label);
   form.appendChild(familyRoleInput.label);
+  form.appendChild(
+    makeElement(
+      "p",
+      "muted",
+      "For family role, choose the closest match to your position in the family system."
+    )
+  );
 
   form.appendChild(makeElement("h3", "", t("ui.questions_title")));
 
