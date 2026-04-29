@@ -85,7 +85,7 @@ function renderParticipantForm() {
     makeElement(
       "p",
       "muted",
-      "For family role, choose the closest match to your position in the family system."
+      "Per il ruolo familiare, scegli la corrispondenza più vicina alla tua posizione nel sistema familiare."
     )
   );
 
@@ -157,12 +157,22 @@ function renderCheckpoint(message) {
   panel.appendChild(makeElement("p", "", t("ui.ready_text")));
   panel.appendChild(makeElement("p", "muted", message || t("ui.member_saved")));
   panel.appendChild(
-    makeElement("p", "muted", "Participants collected: " + String(state.participantCount))
+    makeElement("p", "muted", "Partecipanti raccolti: " + String(state.participantCount))
   );
+  if (state.participantCount < 2) {
+    panel.appendChild(
+      makeElement(
+        "p",
+        "muted",
+        "Sono necessari almeno due partecipanti prima di iniziare l'analisi."
+      )
+    );
+  }
 
   var row = makeElement("div", "row");
   var addButton = makeElement("button", "", t("ui.add_member"));
   var readyButton = makeElement("button", "", t("ui.we_are_ready"));
+  readyButton.disabled = state.participantCount < 2;
 
   addButton.addEventListener("click", renderParticipantForm);
   readyButton.addEventListener("click", function () {
@@ -194,29 +204,55 @@ function renderResults(result) {
   var panel = makeElement("section", "panel stack");
   panel.appendChild(makeElement("h2", "", t("ui.analysis_title")));
 
-  var chartsWrap = makeElement("div", "charts");
-  var maxCharts = Number(result.max_radar_charts || 4);
-  result.participants.slice(0, maxCharts).forEach(function (participant, index) {
-    var title =
-      "Participant " +
-      String(index + 1) +
-      " - " +
-      participant.role +
-      " / " +
-      participant.generation;
-    drawRadarChart(chartsWrap, participant.radar_values, title);
-  });
-  panel.appendChild(chartsWrap);
+  panel.appendChild(
+    makeElement(
+      "p",
+      "muted",
+      "Ogni partecipante viene mostrato con quattro grafici a ragnatela costruiti dai punteggi generati grezzi, non dalle medie."
+    )
+  );
 
-  if (result.participants.length > maxCharts) {
-    panel.appendChild(
+  var participantsWrap = makeElement("div", "participant-list stack");
+  result.participants.forEach(function (participant, index) {
+    var memberCard = makeElement("section", "panel stack member-card");
+    memberCard.appendChild(
+      makeElement(
+        "h3",
+        "",
+        "Membro " +
+          String(index + 1) +
+          " - " +
+          participant.role +
+          " / " +
+          participant.generation
+      )
+    );
+    memberCard.appendChild(makeElement("p", "muted", participant.family_role));
+    memberCard.appendChild(
       makeElement(
         "p",
         "muted",
-        formatWithVariables(t("ui.max_charts_note"), { max_radar_charts: maxCharts })
+        "I dati generati per questo membro sono mostrati qui sotto in quattro diagrammi separati."
       )
     );
-  }
+
+    var chartsWrap = makeElement("div", "member-charts");
+    var analysis = participant.analysis || {};
+    ["basic_emotions", "derived_emotions", "mental_states", "relational_needs"].forEach(
+      function (groupKey) {
+        drawSpiderChart(
+          chartsWrap,
+          groupKey,
+          analysis[groupKey] || {},
+          participant.role + " / " + participant.generation + " / " + participant.family_role
+        );
+      }
+    );
+    memberCard.appendChild(chartsWrap);
+
+    participantsWrap.appendChild(memberCard);
+  });
+  panel.appendChild(participantsWrap);
 
   panel.appendChild(makeElement("h3", "", t("ui.shared_patterns_title")));
   var overlapList = makeElement("ul", "list");
@@ -224,7 +260,7 @@ function renderResults(result) {
     overlapList.appendChild(makeElement("li", "", patternToText(pattern)));
   });
   if (!result.patterns.overlaps.length) {
-    overlapList.appendChild(makeElement("li", "", "No strong overlaps found."));
+    overlapList.appendChild(makeElement("li", "", "Non sono state trovate sovrapposizioni significative."));
   }
   panel.appendChild(overlapList);
 
@@ -234,7 +270,7 @@ function renderResults(result) {
     gapsList.appendChild(makeElement("li", "", patternToText(pattern)));
   });
   if (!result.patterns.gaps.length) {
-    gapsList.appendChild(makeElement("li", "", "No strong gaps found."));
+    gapsList.appendChild(makeElement("li", "", "Non sono state trovate differenze significative."));
   }
   panel.appendChild(gapsList);
 
@@ -246,7 +282,7 @@ function renderResults(result) {
     alignment.appendChild(makeElement("li", "", item));
   });
   if (!result.external_comparison.alignment.length) {
-    alignment.appendChild(makeElement("li", "", "No alignment items available."));
+    alignment.appendChild(makeElement("li", "", "Nessun elemento di allineamento disponibile."));
   }
   panel.appendChild(alignment);
 
@@ -255,7 +291,7 @@ function renderResults(result) {
     divergence.appendChild(makeElement("li", "", item));
   });
   if (!result.external_comparison.divergence.length) {
-    divergence.appendChild(makeElement("li", "", "No divergence items available."));
+    divergence.appendChild(makeElement("li", "", "Nessun elemento di divergenza disponibile."));
   }
   panel.appendChild(divergence);
 
@@ -270,7 +306,7 @@ function buildFeedbackSection() {
 
   var form = makeElement("form", "stack");
   var row = makeElement("div", "row");
-  var yesLabel = makeElement("label", "", "Yes");
+  var yesLabel = makeElement("label", "", "Sì");
   var noLabel = makeElement("label", "", "No");
 
   var yes = document.createElement("input");
@@ -357,8 +393,8 @@ function bootstrap() {
     .catch(function () {
       clearElement(app);
       var panel = makeElement("section", "panel stack");
-      panel.appendChild(makeElement("h2", "", "Initialization failed"));
-      panel.appendChild(makeElement("p", "", "Check server status and try again."));
+      panel.appendChild(makeElement("h2", "", "Inizializzazione fallita"));
+      panel.appendChild(makeElement("p", "", "Controlla lo stato del server e riprova."));
       app.appendChild(panel);
     });
 }

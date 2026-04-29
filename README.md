@@ -1,72 +1,72 @@
-# Family Reflection Map
+# Mappa di riflessione familiare
 
-A wireframe web application that collects independent family member reflections,
-maps answers to emotional and relational categories, and visualizes the output with D3 radar charts.
+Un'app web wireframe che raccoglie in modo indipendente le riflessioni dei membri della famiglia,
+mappa le risposte in categorie emotive e relazionali e visualizza l'output con grafici radar D3.
 
 <p align="center">
-  <img src="https://media.tenor.com/AHBWsE2oYTgAAAAj/telus-critter.gif" alt="a lama" width="300">
+  <img src="https://media.tenor.com/AHBWsE2oYTgAAAAj/telus-critter.gif" alt="una lama" width="300">
 </p>
 
-## Prerequisites
+## Prerequisiti
 
 - [Python 3.11+](https://www.python.org/)
 - [uv](https://docs.astral.sh/uv/)
-- [Ollama](https://ollama.com/) running locally
+- [Ollama](https://ollama.com/) in esecuzione locale
 
-## Setup
+## Configurazione
 
 ```
 uv sync
 ollama pull llama3.2:latest
 ```
 
-## Run
+## Avvio
 
-Start Ollama (if it's not already running):
+Avvia Ollama (se non è già in esecuzione):
 
 ```
 ollama serve
 ```
 
-In another terminal, start the server:
+In un altro terminale, avvia il server:
 
 ```
 uv run uvicorn server:app --reload
 ```
 
-The frontend is served automatically by the Python server.
-Open http://localhost:8000.
+Il frontend viene servito automaticamente dal server Python.
+Apri http://localhost:8000.
 
-## Quick Run (copy/paste)
+## Avvio rapido (copia/incolla)
 
-In terminal 1:
+Nel terminale 1:
 
 ```bash
 ollama pull llama3.2:latest
 ollama serve
 ```
 
-In terminal 2:
+Nel terminale 2:
 
 ```bash
 uv sync
 uv run uvicorn server:app --reload
 ```
 
-Then open http://localhost:8000.
+Quindi apri http://localhost:8000.
 
-## Configuration
+## Configurazione
 
-All user-facing texts and model prompts are in `settings.json`:
+Tutti i testi visibili all'utente e i prompt del modello sono in `settings.json`:
 
-- `ui`: labels, button text, status messages
-- `questions`: the 3 reflective prompts shown to each participant
-- `prompts`: Ollama prompt templates used for validation and analysis
-- `analysis_categories`: target categories and score keys
-- `ollama_model`: default set to `llama3.2:latest`
+- `ui`: etichette, testo dei pulsanti, messaggi di stato
+- `questions`: le 3 domande di riflessione mostrate a ogni partecipante
+- `prompts`: modelli di prompt Ollama usati per validazione e analisi
+- `analysis_categories`: categorie di destinazione e chiavi dei punteggi
+- `ollama_model`: impostato di default su `llama3.2:latest`
 
-Prompt templates support variable injection from runtime data.
-Examples of variables used by the backend:
+I modelli dei prompt supportano l'inserimento di variabili dai dati di runtime.
+Esempi di variabili usate dal backend:
 
 - `{role}`, `{generation}`, `{family_role}`
 - `{question_misunderstood}`, `{question_missing}`, `{question_wish}`
@@ -74,4 +74,4 @@ Examples of variables used by the backend:
 - `{basic_emotions_template}`, `{derived_emotions_template}`
 - `{mental_states_template}`, `{relational_needs_template}`
 
-You can change prompt text in `settings.json` without editing application code.
+Puoi modificare il testo dei prompt in `settings.json` senza toccare il codice dell'applicazione.

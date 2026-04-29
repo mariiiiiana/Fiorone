@@ -1,113 +1,115 @@
-# project implementation plan 
+# piano di implementazione del progetto 
 
- You will build a web application that helps family members reflect on their misunderstandings between each other caused by issues of interpretation and communication as well as generational gaps. 
+ Userai un'applicazione web che aiuta i membri della famiglia a riflettere sui malintesi reciproci causati da problemi di interpretazione e comunicazione, oltre che dai divari generazionali. 
 
-## core mechanics 
-At the beginning, you are welcomed into a data collection phase, which serves to position you within the family system. This step creates a sort of “map” of the family: not only who you are, but also the generational perspective from which you view things.
-If multiple people are participating, each person joins separately and completes their own profile. In this way, responses remain individual and are not directly influenced by others.
-After the profiling phase, the experience moves into its core with three questions about their relationship dynamics.
+## meccaniche principali 
+All'inizio vieni accolto in una fase di raccolta dati, che serve a posizionarti all'interno del sistema familiare. Questo passaggio crea una sorta di “mappa” della famiglia: non solo chi sei, ma anche la prospettiva generazionale da cui osservi le cose.
+Se partecipano più persone, ciascuna entra separatamente e compila il proprio profilo. In questo modo, le risposte restano individuali e non vengono influenzate direttamente dagli altri.
+Dopo la fase di profilazione, l'esperienza entra nel cuore del processo con tre domande sulla dinamica relazionale.
 
-## interaction pipeline
-START
-the user is presented with an introducory screen
+## flusso di interazione
+AVVIO
+l'utente visualizza una schermata introduttiva
 
-User is presented the privacy policy 
-[“agree”]
-├─ Yes → interaction starts
-└─ No → interaction ends 
+All'utente viene mostrata l'informativa sulla privacy 
+[“accetto”]
+├─ Sì → l'interazione inizia
+└─ No → l'interazione termina 
 
-First user profiling
+Primo profilo utente
 
-3 reflective questions
+3 domande di riflessione
 
-Save to memory
+Salva in memoria
 ↓
-["add"?]
-├─ Yes → New profiling → 3 questions → Save → repeat
+[
+"aggiungi"?
+]
+├─ Sì → Nuova profilazione → 3 domande → Salva → ripeti
 └─ No
 
-["are we ready"?]
-├─ No → wait for new member / continue data collection
-└─ Yes
+["siamo pronti"?]
+├─ No → attendi un nuovo membro / continua la raccolta dati
+└─ Sì
 
-Analysis of responses
+Analisi delle risposte
 
-Mapping onto:
-- basic emotions
-- derived emotions
-- mental states
-- relational needs
+Mappatura su:
+- emozioni di base
+- emozioni derivate
+- stati mentali
+- bisogni relazionali
 
-Comparison with other family groups
+Confronto con altri gruppi familiari
 
-Creation of visual interface
+Creazione dell'interfaccia visiva
 
-Generation of 4 radar charts (1 per member)
+Generazione di 4 grafici radar (1 per membro)
 
-Final feedback question
+Domanda finale di feedback
 
-Restart / "start over"
+Riavvio / "ricomincia"
 
-END
+FINE
 
-## implementation guide
-System Structure
-Divide the system into three main modules:
-* Input Module → handles user profiling and responses
-* Processing Module → analyzes and encodes data
-* Output Module → generates visualizations and feedback
+## guida all'implementazione
+Struttura del sistema
+Dividi il sistema in tre moduli principali:
+* Modulo di input → gestisce la profilazione dell'utente e le risposte
+* Modulo di elaborazione → analizza e codifica i dati
+* Modulo di output → genera visualizzazioni e feedback
 
-2. Input Flow (Frontend Logic)
-* Create a step-by-step interface:
-    1. Profiling form (role, generation, family role)
-    2. 3 open-ended questions
-* Add triggers:
-    * “add” → restart flow for a new user
-    * “we are ready” → move to output phase
-* Store each user as a separate entity (object)
+2. Flusso di input (logica frontend)
+* Crea un'interfaccia guidata passo per passo:
+    1. Modulo di profilazione (ruolo, generazione, ruolo familiare)
+    2. 3 domande a risposta aperta
+* Aggiungi i trigger:
+    * “aggiungi” → riavvia il flusso per un nuovo utente
+    * “siamo pronti” → passa alla fase di output
+* Memorizza ogni utente come entità separata (oggetto)
 
-3. Data Structure (Backend)
-Define a user schema like:
+3. Struttura dati (backend)
+Definisci uno schema utente come questo:
 
-{"id": "","role": "parent/child","generation": "","family_role": "","answers": {"misunderstood": "","missing": "","wish": ""},"analysis": {"basic_emotions": {},"derived_emotions": {},"mental_states": {},"relational_needs": {}}}
+{"id": "","role": "genitore/figlio","generation": "","family_role": "","answers": {"misunderstood": "","missing": "","wish": ""},"analysis": {"basic_emotions": {},"derived_emotions": {},"mental_states": {},"relational_needs": {}}}
 
-4. Text Analysis Engine
-Call ollama to Implement NLP processing to:
-* extract keywords and sentiment
-* map text to predefined categories:
-    * emotions
-    * mental states
-    * relational needs
+4. Motore di analisi del testo
+Usa ollama per implementare l'elaborazione NLP per:
+* estrarre parole chiave e sentiment
+* mappare il testo nelle categorie predefinite:
+    * emozioni
+    * stati mentali
+    * bisogni relazionali
 Options:
-* rule-based keyword matching (simpler)
-* ML/NLP models (more advanced)
+* corrispondenza di parole chiave basata su regole (più semplice)
+* modelli ML/NLP (più avanzati)
 
-5. Scoring System
-* Assign values (e.g. 0–10) to each category
-* Normalize scores for radar visualization
-* Ensure consistency across users
+5. Sistema di punteggio
+* Assegna valori (ad esempio 0–10) a ogni categoria
+* Normalizza i punteggi per la visualizzazione radar
+* Assicura coerenza tra gli utenti
 
-6. Comparison Logic
-* Compute:
-    * overlaps (shared high scores)
-    * gaps (high vs low differences)
-* Optionally compare with external dataset (other families)
+6. Logica di confronto
+* Calcola:
+    * sovrapposizioni (punteggi alti condivisi)
+    * differenze (scarti tra valori alti e bassi)
+* Eventualmente confronta con un dataset esterno (altre famiglie)
 
-7. Visualization Layer
-* Generate radar charts (1 per user)
-* use only:
+7. Livello di visualizzazione
+* Genera grafici radar (1 per utente)
+* usa solo:
     * D3.js
 
-Each chart displays:
-* Base emotion
-* Derivative emotions
-* mental states
-* relational needs
+Ogni grafico mostra:
+* emozioni di base
+* emozioni derivate
+* stati mentali
+* bisogni relazionali
 
-8. Interface Design
-* Show:
-    * individual radar charts
-    * shared emotional patterns
+8. Progettazione dell'interfaccia
+* Mostra:
+    * grafici radar individuali
+    * schemi emotivi condivisi
 
 
     BASIC EMOTIONS
@@ -188,16 +190,16 @@ RELATIONAL NEEDS
 * Final question (e.g. “Did this help you reflect?”)
 * Store feedback for iteration/improvement
 
-10. Iteration Loop
-* Allow restart (“start again”)
-* Keep sessions independent or optionally saved
+10. Ciclo iterativo
+* Consenti il riavvio (“ricomincia”)
+* Mantieni le sessioni indipendenti oppure salvabili opzionalmente
 
-## general rules
-* No CSS except for basic layouts - this is still a wireframe
-* Keep UI minimal and reflective, not gamified
-* The system must ensure that each participant interacts independently, without being influenced by other family members’ responses.
-*  All inputs should be treated as personal and subjective perspectives, not as objective truths.
-* The agent must remain neutral at all times, avoiding judgment, interpretation bias, or assigning responsibility. Its role is to facilitate reflection, not to provide solutions or determine who is right, and it does not summarise each users’ responses after each interaction; it stores the answers and uses them to compare them between family members and other  future users. 
-* User responses must be relevant to the questions asked. If a participant provides unrelated or disengaged input, the system should interrupt the experience and invite them to continue only if they are willing to engage meaningfully and the ai informed the unwilling user about AI energy usage.
-* All collected data should be structured consistently to allow comparison across users, while preserving the individuality of each response. Privacy and separation between participants must be maintained throughout the process.
-* Finally, the system should prioritize clarity and simplicity in both interaction and output, ensuring that the experience remains accessible, reflective, and repeatable over time.
+## regole generali
+* Niente CSS oltre a layout di base - è ancora un wireframe
+* Mantieni l'interfaccia minimale e riflessiva, non gamificata
+* Il sistema deve garantire che ogni partecipante interagisca in modo indipendente, senza essere influenzato dalle risposte degli altri membri della famiglia.
+* Tutti gli input devono essere trattati come prospettive personali e soggettive, non come verità oggettive.
+* L'agente deve rimanere neutrale in ogni momento, evitando giudizi, bias interpretativi o l'assegnazione di responsabilità. Il suo ruolo è facilitare la riflessione, non fornire soluzioni o stabilire chi ha ragione, e non deve riassumere le risposte di ciascun utente dopo ogni interazione; memorizza le risposte e le usa per confrontarle tra i membri della famiglia e altri utenti futuri.
+* Le risposte degli utenti devono essere pertinenti alle domande poste. Se un partecipante fornisce un input non correlato o poco coinvolto, il sistema deve interrompere l'esperienza e invitarlo a continuare solo se è disposto a impegnarsi in modo significativo, informando l'utente riluttante del consumo energetico dell'AI.
+* Tutti i dati raccolti devono essere strutturati in modo coerente per consentire il confronto tra utenti, preservando però l'individualità di ogni risposta. Privacy e separazione tra partecipanti devono essere mantenute per tutto il processo.
+* Infine, il sistema deve privilegiare chiarezza e semplicità sia nell'interazione sia nell'output, in modo che l'esperienza resti accessibile, riflessiva e ripetibile nel tempo.

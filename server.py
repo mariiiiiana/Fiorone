@@ -107,6 +107,39 @@ def normalize_group(group_name: str, payload: dict[str, Any]) -> dict[str, int]:
     return normalized
 
 
+def build_object_schema(template: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "type": "object",
+        "properties": {key: {"type": "number"} for key in template.keys()},
+        "required": list(template.keys()),
+        "additionalProperties": False,
+    }
+
+
+def build_analysis_response_schema() -> dict[str, Any]:
+    categories = SETTINGS["analysis_categories"]
+    return {
+        "type": "object",
+        "properties": {
+            "basic_emotions": build_object_schema(categories["basic_emotions"]),
+            "derived_emotions": build_object_schema(categories["derived_emotions"]),
+            "mental_states": build_object_schema(categories["mental_states"]),
+            "relational_needs": build_object_schema(categories["relational_needs"]),
+            "keywords": {"type": "array", "items": {"type": "string"}},
+            "sentiment": {"type": "number"},
+        },
+        "required": [
+            "basic_emotions",
+            "derived_emotions",
+            "mental_states",
+            "relational_needs",
+            "keywords",
+            "sentiment",
+        ],
+        "additionalProperties": False,
+    }
+
+
 def participant_radar_values(analysis: dict[str, Any]) -> dict[str, float]:
     values: dict[str, float] = {}
     for group in (
@@ -280,7 +313,7 @@ async def analyze_participant(payload: dict[str, Any]) -> dict[str, Any]:
     }
     prompt = format_prompt(SETTINGS["prompts"]["analysis_prompt"], variables)
     system_prompt = SETTINGS["prompts"]["analysis_system_prompt"]
-    response_format = SETTINGS["response_schemas"]["analysis"]
+    response_format = build_analysis_response_schema()
 
     try:
         model_output = await call_ollama(prompt, system_prompt, response_format=response_format)
@@ -500,8 +533,11 @@ async def add_participant(request: ParticipantRequest) -> dict[str, Any]:
 @app.post("/analysis/finalize")
 async def finalize_analysis() -> dict[str, Any]:
     participants = CURRENT_SESSION["participants"]
-    if not participants:
-        raise HTTPException(status_code=400, detail=SETTINGS["ui"]["messages"]["no_participants"])
+    if len(participants) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail=SETTINGS["ui"]["messages"]["min_participants"],
+        )
 
     aggregate = aggregate_session(participants)
     patterns = compute_overlaps_and_gaps(participants)
@@ -518,7 +554,7 @@ async def finalize_analysis() -> dict[str, Any]:
                 "role": item["role"],
                 "generation": item["generation"],
                 "family_role": item["family_role"],
-                "radar_values": participant_radar_values(item["analysis"]),
+                "analysis": item["analysis"],
                 "keywords": item["analysis"]["keywords"],
                 "sentiment": item["analysis"]["sentiment"],
             }

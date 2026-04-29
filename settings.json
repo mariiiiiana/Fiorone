@@ -3,81 +3,82 @@
   "strict_engagement_validation": false,
   "max_radar_charts": 4,
   "ui": {
-    "app_title": "Family Reflection Map",
-    "intro_title": "A shared space for reflection",
-    "intro_text": "This experience helps family members reflect on misunderstandings linked to communication and generational perspectives.",
-    "intro_button": "Start",
-    "privacy_title": "Privacy and participation",
-    "privacy_text": "Each participant responds independently. Inputs are personal perspectives and are not treated as objective truth. Responses are stored in structured form for comparison.",
-    "privacy_agree": "I agree",
-    "privacy_decline": "I do not agree",
-    "privacy_decline_message": "The interaction has ended because consent was not provided.",
-    "profile_title": "Participant profile",
-    "questions_title": "Reflective questions",
-    "submit_participant": "Save participant",
-    "add_member": "Add another member",
-    "we_are_ready": "We are ready",
-    "member_saved": "Participant saved independently.",
-    "ready_title": "Collection checkpoint",
-    "ready_text": "You can add another participant or continue to analysis.",
-    "analysis_title": "Relational map output",
-    "shared_patterns_title": "Shared patterns",
-    "gaps_title": "Differences in intensity",
-    "external_title": "Comparison with previous family groups",
-    "feedback_title": "Final reflection",
-    "feedback_question": "Did this help you reflect?",
-    "feedback_placeholder": "Optional note",
-    "feedback_submit": "Save feedback",
-    "restart": "Start over",
-    "loading": "Processing...",
-    "max_charts_note": "Only the first {max_radar_charts} radar charts are displayed.",
+    "app_title": "Mappa di riflessione familiare",
+    "intro_title": "Uno spazio condiviso per la riflessione",
+    "intro_text": "Questa esperienza aiuta i membri della famiglia a riflettere sui malintesi legati alla comunicazione e alle prospettive generazionali.",
+    "intro_button": "Inizia",
+    "privacy_title": "Privacy e partecipazione",
+    "privacy_text": "Ogni partecipante risponde in modo indipendente. Gli input sono prospettive personali e non vengono trattati come verità oggettive. Le risposte vengono salvate in forma strutturata per il confronto.",
+    "privacy_agree": "Accetto",
+    "privacy_decline": "Non accetto",
+    "privacy_decline_message": "L'interazione è terminata perché il consenso non è stato fornito.",
+    "profile_title": "Profilo partecipante",
+    "questions_title": "Domande di riflessione",
+    "submit_participant": "Salva partecipante",
+    "add_member": "Aggiungi un altro membro",
+    "we_are_ready": "Siamo pronti",
+    "member_saved": "Partecipante salvato separatamente.",
+    "ready_title": "Punto di raccolta",
+    "ready_text": "Puoi aggiungere un altro partecipante oppure continuare all'analisi quando saranno stati raccolti almeno due partecipanti.",
+    "analysis_title": "Output della mappa relazionale",
+    "shared_patterns_title": "Schemi condivisi",
+    "gaps_title": "Differenze di intensità",
+    "external_title": "Confronto con gruppi familiari precedenti",
+    "feedback_title": "Riflessione finale",
+    "feedback_question": "Ti è stato utile riflettere?",
+    "feedback_placeholder": "Nota facoltativa",
+    "feedback_submit": "Salva feedback",
+    "restart": "Ricomincia",
+    "loading": "Elaborazione...",
+    "max_charts_note": "Vengono mostrati solo i primi {max_radar_charts} grafici radar.",
     "messages": {
-      "network_error": "Request failed. Please try again.",
-      "participant_validation_error": "Please complete all profile fields and all three answers.",
-      "disengaged_input": "Your input seems unrelated or not sufficiently engaged with the reflective questions. Please continue only if you are willing to engage meaningfully. AI processing consumes energy.",
-      "no_participants": "Add at least one participant before analysis.",
-      "feedback_saved": "Feedback saved.",
-      "session_reset": "Session restarted."
+      "network_error": "Richiesta fallita. Riprova.",
+      "participant_validation_error": "Completa tutti i campi del profilo e tutte e tre le risposte.",
+      "disengaged_input": "Il tuo input sembra non essere pertinente o non abbastanza coinvolto rispetto alle domande di riflessione. Continua solo se sei disposto a partecipare in modo significativo. L'elaborazione AI consuma energia.",
+      "no_participants": "Aggiungi almeno due partecipanti prima dell'analisi.",
+      "min_participants": "Sono necessari almeno due partecipanti prima dell'analisi.",
+      "feedback_saved": "Feedback salvato.",
+      "session_reset": "Sessione riavviata."
     },
     "labels": {
-      "role": "Role (parent/child)",
-      "generation": "Generation",
-      "family_role": "Family role"
+      "role": "Ruolo (genitore/figlio)",
+      "generation": "Generazione",
+      "family_role": "Ruolo familiare"
     }
   },
   "profile_options": {
     "role": [
-      {"label": "Parent", "value": "Parent"},
-      {"label": "Child", "value": "Child"}
+      {"label": "Genitore", "value": "Genitore"},
+      {"label": "Figlio", "value": "Figlio"}
     ],
     "generation": [
-      {"label": "Generation Z (approximately 1997–2012)", "value": "Generation Z (approximately 1997–2012)"},
-      {"label": "Millennials (approximately 1981–1996)", "value": "Millennials (approximately 1981–1996)"},
-      {"label": "Generation X (approximately 1965–1980)", "value": "Generation X (approximately 1965–1980)"},
-      {"label": "Baby Boomers (approximately 1946–1964)", "value": "Baby Boomers (approximately 1946–1964)"},
-      {"label": "Other", "value": "Other"}
+      {"label": "Generazione Z (circa 1997–2012)", "value": "Generazione Z (circa 1997–2012)"},
+      {"label": "Millennial (circa 1981–1996)", "value": "Millennial (circa 1981–1996)"},
+      {"label": "Generazione X (circa 1965–1980)", "value": "Generazione X (circa 1965–1980)"},
+      {"label": "Baby Boomer (circa 1946–1964)", "value": "Baby Boomer (circa 1946–1964)"},
+      {"label": "Altro", "value": "Altro"}
     ],
     "family_role": [
-      {"label": "Mother", "value": "Mother"},
-      {"label": "Father", "value": "Father"},
-      {"label": "Older daughter", "value": "Older daughter"},
-      {"label": "Younger son", "value": "Younger son"},
-      {"label": "Grandmother", "value": "Grandmother"},
-      {"label": "Grandfather", "value": "Grandfather"},
-      {"label": "Other", "value": "Other"}
+      {"label": "Madre", "value": "Madre"},
+      {"label": "Padre", "value": "Padre"},
+      {"label": "Figlio maggiore", "value": "Figlio maggiore"},
+      {"label": "Figlia minore", "value": "Figlia minore"},
+      {"label": "Figlia maggiore", "value": "Figlia maggiore"},
+      {"label": "Figlio minore", "value": "Figlio minore"},
+      {"label": "Altro", "value": "Altro"}
     ]
   },
   "questions": {
-    "misunderstood": "When did you recently feel misunderstood in your family, and what do you think happened?",
-    "missing": "What do you feel is missing in your family communication right now?",
-    "wish": "What do you wish others in your family could better understand about your perspective?"
+    "misunderstood": "Quando ti sei sentito frainteso di recente in famiglia, e cosa pensi sia successo?",
+    "missing": "Cosa senti che manca nella comunicazione familiare in questo momento?",
+    "wish": "Cosa vorresti che gli altri in famiglia capissero meglio del tuo punto di vista?"
   },
   "prompts": {
-    "engagement_system_prompt": "You are a strict validation assistant. Stay neutral and evaluate relevance and engagement only.",
-    "engagement_check_prompt": "Evaluate whether the participant answers are relevant to the three reflective family questions and show meaningful engagement. Return only valid JSON with keys: is_relevant (boolean), is_engaged (boolean), reason (string). Participant metadata: role={role}, generation={generation}, family_role={family_role}. Questions: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. Answers JSON: {answers_json}.",
-    "analysis_system_prompt": "You are a neutral reflection mapper. Do not assign blame, advice, or judgment.",
-    "analysis_prompt": "Map the participant text into the provided categories and return only valid JSON. Scale each category score from 0 to 10. Keep all keys exactly as provided. Also include extracted keywords (list of strings) and sentiment (number between -1 and 1). Participant metadata: role={role}, generation={generation}, family_role={family_role}. Questions: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. Answers JSON: {answers_json}. Use these category templates exactly. Basic emotions template: {basic_emotions_template}. Derived emotions template: {derived_emotions_template}. Mental states template: {mental_states_template}. Relational needs template: {relational_needs_template}. Output schema: {\"basic_emotions\": {...}, \"derived_emotions\": {...}, \"mental_states\": {...}, \"relational_needs\": {...}, \"keywords\": [], \"sentiment\": 0.0}",
-    "external_comparison_prompt": "Summarize the comparison between current family aggregate scores and historical aggregate scores in a neutral way. Return only valid JSON with keys: alignment (array of strings), divergence (array of strings), note (string). Current aggregate: {current_aggregate_json}. Historical aggregate: {historical_aggregate_json}."
+    "engagement_system_prompt": "Sei un assistente di validazione rigoroso. Mantieni un tono neutrale e valuta solo rilevanza e coinvolgimento.",
+    "engagement_check_prompt": "Valuta se le risposte del partecipante sono pertinenti alle tre domande familiari di riflessione e mostrano un coinvolgimento significativo. Restituisci solo JSON valido con le chiavi: is_relevant (booleano), is_engaged (booleano), reason (stringa). Metadati del partecipante: role={role}, generation={generation}, family_role={family_role}. Domande: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. JSON delle risposte: {answers_json}.",
+    "analysis_system_prompt": "Sei una mappa di riflessione neutrale. Non attribuire colpe, consigli o giudizi.",
+    "analysis_prompt": "Mappa il testo del partecipante nelle categorie fornite e restituisci solo JSON valido. Assegna a ogni punteggio annidato un valore da 0 a 10. Mantieni tutte le chiavi esattamente come fornite e non ridurle ai quattro gruppi macro. Includi anche le parole chiave estratte (lista di stringhe) e il sentiment (numero tra -1 e 1). Metadati del partecipante: role={role}, generation={generation}, family_role={family_role}. Domande: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. JSON delle risposte: {answers_json}. Usa esattamente questi modelli di categoria. Modello delle emozioni di base: {basic_emotions_template}. Modello delle emozioni derivate: {derived_emotions_template}. Modello degli stati mentali: {mental_states_template}. Modello dei bisogni relazionali: {relational_needs_template}. Schema di output: {\"basic_emotions\": {...}, \"derived_emotions\": {...}, \"mental_states\": {...}, \"relational_needs\": {...}, \"keywords\": [], \"sentiment\": 0.0}",
+    "external_comparison_prompt": "Riassumi il confronto tra i punteggi aggregati familiari attuali e quelli storici in modo neutrale. Restituisci solo JSON valido con le chiavi: alignment (array di stringhe), divergence (array di stringhe), note (stringa). Aggregato attuale: {current_aggregate_json}. Aggregato storico: {historical_aggregate_json}."
   },
   "response_schemas": {
     "engagement": {
