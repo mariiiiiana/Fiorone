@@ -329,6 +329,8 @@ function buildFeedbackSection() {
   var note = createLabeledInput(t("ui.feedback_placeholder"), "feedback", true);
   var submit = makeElement("button", "", t("ui.feedback_submit"));
   submit.type = "submit";
+  var saveData = makeElement("button", "", "Salva dati della sessione");
+  saveData.type = "button";
   var restart = makeElement("button", "", t("ui.restart"));
   restart.type = "button";
   var status = makeElement("div", "status muted", "");
@@ -336,10 +338,26 @@ function buildFeedbackSection() {
   form.appendChild(row);
   form.appendChild(note.label);
   form.appendChild(submit);
+  form.appendChild(saveData);
   form.appendChild(restart);
   form.appendChild(status);
 
   restart.addEventListener("click", restartFlow);
+  
+  saveData.addEventListener("click", function () {
+    showStatus(status, t("ui.loading"), false);
+    saveSession()
+      .then(function (result) {
+        showStatus(status, result.message || t("ui.messages.session_saved"), false);
+      })
+      .catch(function (error) {
+        showStatus(
+          status,
+          extractErrorMessage(error, t("ui.messages.network_error")),
+          true
+        );
+      });
+  });
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();

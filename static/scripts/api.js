@@ -37,3 +37,10 @@ function submitFeedback(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+function saveSession() {
+  return requestJson("/session/save", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+}

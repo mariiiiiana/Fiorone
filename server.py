@@ -1,6 +1,7 @@
 """Backend for multi-participant family reflection mapping."""
 
 import json
+import random
 import re
 import uuid
 from datetime import datetime, timezone
@@ -16,6 +17,7 @@ from pydantic import BaseModel
 SETTINGS_PATH = Path("settings.json")
 DATA_DIR = Path("data")
 HISTORY_PATH = DATA_DIR / "family_groups.json"
+DATASET_PATH = Path("dataset.json")
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 SETTINGS = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
@@ -28,11 +30,35 @@ def utc_now_iso() -> str:
 
 
 def new_session() -> dict[str, Any]:
+    question_groups = SETTINGS.get("question_groups", [])
+    selected_group_index = (
+        random.randint(0, len(question_groups) - 1) if question_groups else 0
+    )
     return {
         "session_id": str(uuid.uuid4()),
         "created_at": utc_now_iso(),
         "participants": [],
         "feedback": None,
+        "selected_question_group_index": selected_group_index,
+    }
+
+
+def get_selected_questions() -> dict[str, str]:
+    """Return the questions for the currently selected group."""
+    question_groups = SETTINGS.get("question_groups", [])
+    if not question_groups:
+        return {
+            "misunderstood": "",
+            "missing": "",
+            "wish": ""
+        }
+    idx = CURRENT_SESSION.get("selected_question_group_index", 0)
+    idx = max(0, min(idx, len(question_groups) - 1))
+    group = question_groups[idx]
+    return {
+        "misunderstood": group.get("misunderstood", ""),
+        "missing": group.get("missing", ""),
+        "wish": group.get("wish", "")
     }
 
 
@@ -243,7 +269,7 @@ def baseline_validation(answers: dict[str, str]) -> dict[str, Any]:
 
 async def validate_participant_input(payload: dict[str, Any]) -> dict[str, Any]:
     answers = payload["answers"]
-    question_map = SETTINGS["questions"]
+    question_map = get_selected_questions()
     variables = {
         "role": payload["role"],
         "generation": payload["generation"],
@@ -296,7 +322,7 @@ def empty_analysis() -> dict[str, Any]:
 
 
 async def analyze_participant(payload: dict[str, Any]) -> dict[str, Any]:
-    question_map = SETTINGS["questions"]
+    question_map = get_selected_questions()
     categories = SETTINGS["analysis_categories"]
     variables = {
         "role": payload["role"],
@@ -464,7 +490,7 @@ async def app_config() -> dict[str, Any]:
     return {
         "ui": SETTINGS["ui"],
         "profile_options": SETTINGS.get("profile_options", {}),
-        "questions": SETTINGS["questions"],
+        "questions": get_selected_questions(),
         "max_radar_charts": SETTINGS.get("max_radar_charts", 4),
     }
 
@@ -487,7 +513,7 @@ async def add_participant(request: ParticipantRequest) -> dict[str, Any]:
         if not str(payload[field]).strip():
             raise HTTPException(status_code=400, detail="Missing required profile fields")
 
-    expected_question_keys = set(SETTINGS["questions"].keys())
+    expected_question_keys = set(get_selected_questions().keys())
     if set(payload["answers"].keys()) != expected_question_keys:
         raise HTTPException(status_code=400, detail="Answers must match configured questions")
 
@@ -589,6 +615,63 @@ async def save_feedback(request: FeedbackRequest) -> dict[str, Any]:
         "created_at": utc_now_iso(),
     }
     return {"ok": True, "message": SETTINGS["ui"]["messages"]["feedback_saved"]}
+
+
+@app.post("/session/save")
+async def save_session_data() -> dict[str, Any]:
+    """Save current session data to dataset.json (workspace root)."""
+    participants = CURRENT_SESSION["participants"]
+    if not participants:
+        raise HTTPException(
+            status_code=400,
+            detail="Nessun partecipante nella sessione corrente",
+        )
+
+    if DATASET_PATH.exists():
+        try:
+            dataset = json.loads(DATASET_PATH.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            dataset = {}
+    else:
+        dataset = {}
+
+    if not isinstance(dataset, dict):
+        dataset = {}
+
+    if "saved_sessions" not in dataset or not isinstance(dataset["saved_sessions"], list):
+        dataset["saved_sessions"] = []
+
+    session_entry = {
+        "session_id": CURRENT_SESSION["session_id"],
+        "created_at": CURRENT_SESSION["created_at"],
+        "saved_at": utc_now_iso(),
+        "participants_count": len(participants),
+        "feedback": CURRENT_SESSION.get("feedback"),
+        "participants": [
+            {
+                "id": p["id"],
+                "role": p["role"],
+                "generation": p["generation"],
+                "family_role": p["family_role"],
+                "answers": p["answers"],
+                "analysis": p["analysis"],
+                "created_at": p["created_at"],
+            }
+            for p in participants
+        ],
+    }
+
+    dataset["saved_sessions"].append(session_entry)
+    DATASET_PATH.write_text(
+        json.dumps(dataset, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    return {
+        "ok": True,
+        "message": SETTINGS["ui"]["messages"]["session_saved"],
+        "session_id": CURRENT_SESSION["session_id"],
+    }
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

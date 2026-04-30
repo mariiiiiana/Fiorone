@@ -28,6 +28,7 @@
     "feedback_question": "Ti è stato utile riflettere?",
     "feedback_placeholder": "Nota facoltativa",
     "feedback_submit": "Salva feedback",
+    "save_data_button": "Salva dati della sessione",
     "restart": "Ricomincia",
     "loading": "Elaborazione...",
     "max_charts_note": "Vengono mostrati solo i primi {max_radar_charts} grafici radar.",
@@ -38,6 +39,7 @@
       "no_participants": "Aggiungi almeno due partecipanti prima dell'analisi.",
       "min_participants": "Sono necessari almeno due partecipanti prima dell'analisi.",
       "feedback_saved": "Feedback salvato.",
+      "session_saved": "Dati della sessione salvati con successo!",
       "session_reset": "Sessione riavviata."
     },
     "labels": {
@@ -68,11 +70,43 @@
       {"label": "Altro", "value": "Altro"}
     ]
   },
-  "questions": {
-    "misunderstood": "Quando ti sei sentito frainteso di recente in famiglia, e cosa pensi sia successo?",
-    "missing": "Cosa senti che manca nella comunicazione familiare in questo momento?",
-    "wish": "Cosa vorresti che gli altri in famiglia capissero meglio del tuo punto di vista?"
-  },
+  "question_groups": [
+    {
+      "group_id": "group_1",
+      "group_name": "Comprensione e comunicazione",
+      "misunderstood": "Cosa ti fa sentire incompreso?",
+      "missing": "Cosa ti manca del vostro rapporto?",
+      "wish": "Cosa vorresti che l'altro capisse?"
+    },
+    {
+      "group_id": "group_2",
+      "group_name": "Ferite e prospettive",
+      "misunderstood": "C'è una situazione che ti ha ferito?",
+      "missing": "C'è qualcosa che potresti aver frainteso?",
+      "wish": "Se osservassi questa scena da fuori, cosa vedresti?"
+    },
+    {
+      "group_id": "group_3",
+      "group_name": "Comportamenti e frustrazione",
+      "misunderstood": "Cosa ti fa arrabbiare di più dell'altra persona?",
+      "missing": "Cosa vorresti che facesse per far sì che determinati aspetti non ti infastidiscano?",
+      "wish": "Hai dato un significato preciso a quel comportamento?"
+    },
+    {
+      "group_id": "group_4",
+      "group_name": "Percezione del rapporto",
+      "misunderstood": "Come descriveresti il tuo rapporto con l'altra persona?",
+      "missing": "Ti senti giudicato/a spesso?",
+      "wish": "Quanto ti senti ascoltato/a davvero?"
+    },
+    {
+      "group_id": "group_5",
+      "group_name": "Emozioni e ascolto",
+      "misunderstood": "Le tue emozioni vengono prese sul serio?",
+      "missing": "Ti capita di nascondere come ti senti?",
+      "wish": "Hai bisogno di più ascolto o più spazio?"
+    }
+  ],
   "prompts": {
     "engagement_system_prompt": "Sei un assistente di validazione rigoroso. Mantieni un tono neutrale e valuta solo rilevanza e coinvolgimento.",
     "engagement_check_prompt": "Valuta se le risposte del partecipante sono pertinenti alle tre domande familiari di riflessione e mostrano un coinvolgimento significativo. Restituisci solo JSON valido con le chiavi: is_relevant (booleano), is_engaged (booleano), reason (stringa). Metadati del partecipante: role={role}, generation={generation}, family_role={family_role}. Domande: misunderstood={question_misunderstood}; missing={question_missing}; wish={question_wish}. JSON delle risposte: {answers_json}.",

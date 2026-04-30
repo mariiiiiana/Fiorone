@@ -132,16 +132,21 @@ function drawSpiderChart(container, groupKey, groupScores, memberLabel) {
   }
 
   var largeGroup = dimensions.length > 12;
-  var width = largeGroup ? 520 : 400;
-  var height = largeGroup ? 480 : 360;
-  var radius = largeGroup ? 170 : 126;
+  var width = largeGroup ? 460 : 400;
+  var height = largeGroup ? 430 : 360;
+  var radius = largeGroup ? 148 : 126;
   var centerX = width / 2;
-  var centerY = height / 2 - 6;
+  var centerY = height / 2;
   var theme = chartTheme(groupKey);
   var angleSlice = (Math.PI * 2) / dimensions.length;
   var scale = d3.scaleLinear().domain([0, 10]).range([0, radius]);
 
-  var svg = d3.create("svg").attr("width", width).attr("height", height);
+  var svg = d3
+    .create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", "0 0 " + width + " " + height)
+    .attr("preserveAspectRatio", "xMidYMid meet");
   var group = svg.append("g").attr("transform", "translate(" + centerX + "," + centerY + ")");
 
   for (var level = 1; level <= 5; level += 1) {
