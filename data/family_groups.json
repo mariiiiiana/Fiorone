@@ -1252,5 +1252,203 @@
         "Belonging": 4.5
       }
     }
+  },
+  {
+    "session_id": "51aea5e8-0dd2-4046-8ebe-7edec848798f",
+    "created_at": "2026-05-19T12:08:11.398207+00:00",
+    "saved_at": "2026-05-19T12:11:28.270703+00:00",
+    "participants_count": 2,
+    "aggregate": {
+      "basic_emotions": {
+        "Joy": 0.0,
+        "Sadness": 3.0,
+        "Anger": 1.5,
+        "Fear": 2.0,
+        "Disgust": 0.5,
+        "Surprise": 0.0
+      },
+      "derived_emotions": {
+        "Enthusiasm": 0.0,
+        "Gratitude": 1.0,
+        "Pride": 0.0,
+        "Love": 3.0,
+        "Satisfaction": 1.5,
+        "Relief": 2.5,
+        "Affliction": 2.0,
+        "Loneliness": 3.5,
+        "Despair": 1.5,
+        "Disappointment": 0.5,
+        "Nostalgia": 1.0,
+        "Frustration": 3.0,
+        "Impatience": 1.5,
+        "Resentment": 2.5,
+        "Anxiety": 4.0,
+        "Insecurity": 2.0,
+        "Stress": 3.5,
+        "Panic": 0.5,
+        "Worry": 1.0,
+        "Shame": 0.0,
+        "Guilt": 1.5,
+        "Jealousy": 0.0,
+        "Envy": 0.5,
+        "Helplessness": 2.5
+      },
+      "mental_states": {
+        "Overthinking": 4.0,
+        "Confusion": 1.0,
+        "Apathy": 2.0,
+        "Boredom": 1.5,
+        "Mental fatigue": 3.0,
+        "Indifference": 0.0,
+        "Disinterest": 2.5,
+        "Uncertainty": 1.5,
+        "Dissociation / detachment": 2.0,
+        "Feeling overwhelmed": 4.0
+      },
+      "relational_needs": {
+        "Feeling heard": 7.0,
+        "Feeling understood": 5.0,
+        "Feeling accepted": 5.0,
+        "Feeling valued": 5.5,
+        "Feeling safe": 3.0,
+        "Feeling free to be yourself": 5.0,
+        "Empathy": 8.0,
+        "Connection": 8.0,
+        "Authentic dialogue": 7.5,
+        "Belonging": 5.5
+      }
+    }
+  },
+  {
+    "session_id": "a0ccf2d5-1f30-43a5-8d10-37f69093f560",
+    "created_at": "2026-05-19T12:17:50.386833+00:00",
+    "saved_at": "2026-05-19T12:20:35.925166+00:00",
+    "participants_count": 2,
+    "aggregate": {
+      "basic_emotions": {
+        "Joy": 0.0,
+        "Sadness": 3.0,
+        "Anger": 1.5,
+        "Fear": 2.0,
+        "Disgust": 0.0,
+        "Surprise": 0.5
+      },
+      "derived_emotions": {
+        "Enthusiasm": 0.0,
+        "Gratitude": 0.0,
+        "Pride": 0.0,
+        "Love": 1.5,
+        "Satisfaction": 2.0,
+        "Relief": 0.0,
+        "Affliction": 3.5,
+        "Loneliness": 2.5,
+        "Despair": 1.5,
+        "Disappointment": 1.0,
+        "Nostalgia": 0.0,
+        "Frustration": 2.0,
+        "Impatience": 1.5,
+        "Resentment": 1.5,
+        "Anxiety": 3.5,
+        "Insecurity": 2.0,
+        "Stress": 4.0,
+        "Panic": 0.0,
+        "Worry": 3.0,
+        "Shame": 0.5,
+        "Guilt": 0.0,
+        "Jealousy": 0.0,
+        "Envy": 0.0,
+        "Helplessness": 2.5
+      },
+      "mental_states": {
+        "Overthinking": 1.0,
+        "Confusion": 0.5,
+        "Apathy": 0.0,
+        "Boredom": 0.0,
+        "Mental fatigue": 3.5,
+        "Indifference": 0.0,
+        "Disinterest": 0.5,
+        "Uncertainty": 2.0,
+        "Dissociation / detachment": 0.0,
+        "Feeling overwhelmed": 5.0
+      },
+      "relational_needs": {
+        "Feeling heard": 3.5,
+        "Feeling understood": 3.0,
+        "Feeling accepted": 2.5,
+        "Feeling valued": 2.5,
+        "Feeling safe": 2.0,
+        "Feeling free to be yourself": 2.0,
+        "Empathy": 3.0,
+        "Connection": 5.0,
+        "Authentic dialogue": 3.0,
+        "Belonging": 3.5
+      }
+    }
+  },
+  {
+    "session_id": "249fcd67-727f-49b7-a933-56615cfc5612",
+    "created_at": "2026-05-19T12:22:40.197832+00:00",
+    "saved_at": "2026-05-19T12:26:07.376376+00:00",
+    "participants_count": 2,
+    "aggregate": {
+      "basic_emotions": {
+        "Joy": 0.0,
+        "Sadness": 5.0,
+        "Anger": 4.0,
+        "Fear": 2.5,
+        "Disgust": 1.0,
+        "Surprise": 4.5
+      },
+      "derived_emotions": {
+        "Enthusiasm": 0.0,
+        "Gratitude": 0.0,
+        "Pride": 0.0,
+        "Love": 1.0,
+        "Satisfaction": 3.0,
+        "Relief": 5.0,
+        "Affliction": 4.5,
+        "Loneliness": 4.5,
+        "Despair": 1.0,
+        "Disappointment": 2.5,
+        "Nostalgia": 0.0,
+        "Frustration": 5.0,
+        "Impatience": 3.0,
+        "Resentment": 5.5,
+        "Anxiety": 7.5,
+        "Insecurity": 2.5,
+        "Stress": 5.0,
+        "Panic": 1.5,
+        "Worry": 4.5,
+        "Shame": 0.0,
+        "Guilt": 0.0,
+        "Jealousy": 0.0,
+        "Envy": 0.0,
+        "Helplessness": 4.5
+      },
+      "mental_states": {
+        "Overthinking": 4.0,
+        "Confusion": 4.5,
+        "Apathy": 1.5,
+        "Boredom": 2.0,
+        "Mental fatigue": 5.0,
+        "Indifference": 1.0,
+        "Disinterest": 0.0,
+        "Uncertainty": 7.0,
+        "Dissociation / detachment": 3.5,
+        "Feeling overwhelmed": 8.0
+      },
+      "relational_needs": {
+        "Feeling heard": 5.5,
+        "Feeling understood": 5.5,
+        "Feeling accepted": 3.5,
+        "Feeling valued": 2.5,
+        "Feeling safe": 1.5,
+        "Feeling free to be yourself": 4.0,
+        "Empathy": 7.5,
+        "Connection": 5.5,
+        "Authentic dialogue": 5.0,
+        "Belonging": 4.5
+      }
+    }
   }
 ]

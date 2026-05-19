@@ -251,34 +251,63 @@ def compute_overlaps_and_gaps(participants: list[dict[str, Any]]) -> dict[str, l
         return {"overlaps": [], "gaps": []}
 
     aggregate = aggregate_session(participants)
-    overlaps: list[dict[str, Any]] = []
-    gaps: list[dict[str, Any]] = []
+    category_labels = {
+        "basic_emotions": "Emozioni di base",
+        "derived_emotions": "Emozioni derivate",
+        "mental_states": "Stati mentali",
+        "relational_needs": "Bisogni relazionali"
+    }
+    
+    candidate_overlaps = []
+    candidate_gaps = []
 
     for group, scores in aggregate.items():
-        for key, avg_score in scores.items():
-            member_scores = [p["analysis"][group][key] for p in participants]
-            spread = max(member_scores) - min(member_scores)
+        group_avg = round(sum(scores.values()) / len(scores), 2) if scores else 0
+        
+        all_member_scores = []
+        for key in scores.keys():
+            for participant in participants:
+                all_member_scores.append(participant["analysis"][group][key])
+        
+        if all_member_scores:
+            group_spread = max(all_member_scores) - min(all_member_scores)
+            min_score = min(all_member_scores)
+        else:
+            group_spread = 0
+            min_score = 0
+        
+        category_label = category_labels.get(group, group)
+        
+        candidate_overlaps.append({
+            "group": group,
+            "label": category_label,
+            "average": group_avg,
+            "meets_threshold": group_avg >= 6 and min_score >= 4
+        })
+        
+        candidate_gaps.append({
+            "group": group,
+            "label": category_label,
+            "spread": group_spread,
+            "meets_threshold": group_spread >= 4
+        })
 
-            if avg_score >= 6 and min(member_scores) >= 4:
-                overlaps.append(
-                    {
-                        "group": group,
-                        "label": key,
-                        "average": round(avg_score, 2),
-                    }
-                )
-            if spread >= 4:
-                gaps.append(
-                    {
-                        "group": group,
-                        "label": key,
-                        "spread": spread,
-                        "scores": member_scores,
-                    }
-                )
+    overlaps_meeting_threshold = [o for o in candidate_overlaps if o["meets_threshold"]]
+    if overlaps_meeting_threshold:
+        overlaps = sorted(overlaps_meeting_threshold, key=lambda item: item["average"], reverse=True)[:8]
+    else:
+        overlaps = sorted(candidate_overlaps, key=lambda item: item["average"], reverse=True)[:2]
+    
+    overlaps = [{k: v for k, v in o.items() if k != "meets_threshold"} for o in overlaps]
 
-    overlaps = sorted(overlaps, key=lambda item: item["average"], reverse=True)[:8]
-    gaps = sorted(gaps, key=lambda item: item["spread"], reverse=True)[:8]
+    gaps_meeting_threshold = [g for g in candidate_gaps if g["meets_threshold"]]
+    if gaps_meeting_threshold:
+        gaps = sorted(gaps_meeting_threshold, key=lambda item: item["spread"], reverse=True)[:8]
+    else:
+        gaps = sorted(candidate_gaps, key=lambda item: item["spread"], reverse=True)[:2]
+    
+    gaps = [{k: v for k, v in g.items() if k != "meets_threshold"} for g in gaps]
+
     return {"overlaps": overlaps, "gaps": gaps}
 
 
