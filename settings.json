@@ -1,6 +1,6 @@
 {
   "ollama_model": "llama3.2:latest",
-  "strict_engagement_validation": false,
+  "strict_engagement_validation": true,
   "max_radar_charts": 4,
   "ui": {
     "app_title": "Mappa di riflessione familiare",
@@ -40,7 +40,13 @@
       "min_participants": "Sono necessari almeno due partecipanti prima dell'analisi.",
       "feedback_saved": "Feedback salvato.",
       "session_saved": "Dati della sessione salvati con successo!",
-      "session_reset": "Sessione riavviata."
+      "session_reset": "Sessione riavviata.",
+      "disengaged_title": "Partecipazione insufficiente",
+      "disengaged_message_1": "Le tue risposte non sembrano sufficientemente pertinenti o coinvolte rispetto alle domande di riflessione.",
+      "disengaged_message_2": "Questo strumento di riflessione AI è energeticamente intensivo: ogni elaborazione richiede risorse computazionali significative.",
+      "disengaged_message_3": "Per continuare, abbiamo bisogno di risposte autentiche e coinvolte che giustifichino l'uso di queste risorse.",
+      "disengaged_interrupt": "Interrompi sessione",
+      "disengaged_restart": "Ricomincia da capo"
     },
     "labels": {
       "role": "Ruolo (genitore/figlio)",
@@ -169,7 +175,7 @@
             "Envy": {"type": "number"},
             "Helplessness": {"type": "number"}
           },
-          "required": ["Enthusiasm", "Gratitude", "Pride", "Love", "Satisfaction", "Relief", "Affliction", "Loneliness", "Despair", "Disappointment", "Nostalgia", "Frustration", "Impatience", "Resentment", "Anxiety", "Insecurity", "Stress", "Panic", "Worry", "Shame", "Guilt", "Jealousy", "Envy", "Helplessness"],
+          "required": ["Enthusiasm", "Gratitude", "Pride", "Love", "Satisfaction", "Loneliness", "Disappointment", "Nostalgia", "Frustration", "Resentment", "Anxiety", "Insecurity", "Shame", "Jealousy"],
           "additionalProperties": false
         },
         "mental_states": {

@@ -14,6 +14,61 @@ function t(path) {
   return value;
 }
 
+function countWords(text) {
+  return String(text || "")
+    .trim()
+    .split(/\s+/)
+    .filter(function (word) {
+      return word.length > 0;
+    }).length;
+}
+
+function getMinWordsPerAnswer() {
+  return state.config && state.config.min_words_per_answer
+    ? state.config.min_words_per_answer
+    : 10;
+}
+
+function validateParticipantAnswers(payload) {
+  var minWords = getMinWordsPerAnswer();
+  var keys = Object.keys(payload.answers || {});
+
+  for (var i = 0; i < keys.length; i += 1) {
+    var key = keys[i];
+    var words = countWords(payload.answers[key]);
+    if (words < minWords) {
+      return {
+        ok: false,
+        message:
+          "La risposta a \"" + key + "\" ha solo " + words + " parole. Servono almeno " + minWords + " parole.",
+      };
+    }
+  }
+
+  return { ok: true, message: "" };
+}
+
+function formatValidationDebug(debugInfo) {
+  if (!debugInfo) return "";
+
+  var counts = Object.keys(debugInfo.word_counts || {})
+    .map(function (key) {
+      return key + ": " + debugInfo.word_counts[key] + " parole";
+    })
+    .join(", ");
+
+  return (
+    "Ricevuto dal server -> ruolo: " +
+    (debugInfo.role || "") +
+    ", generazione: " +
+    (debugInfo.generation || "") +
+    ", ruolo familiare: " +
+    (debugInfo.family_role || "") +
+    ". Conteggi: " +
+    counts
+  );
+}
+
 function renderIntro() {
   clearElement(app);
 
@@ -90,13 +145,27 @@ function renderParticipantForm() {
   );
 
   form.appendChild(makeElement("h3", "", t("ui.questions_title")));
+  form.appendChild(
+    makeElement(
+      "p",
+      "instructions",
+      t("ui.questions_instructions")
+    )
+  );
 
   var questionFields = {};
+  var answerStatus = makeElement("div", "status muted", "");
   Object.keys(state.config.questions).forEach(function (key) {
     var field = createLabeledInput(state.config.questions[key], key, true);
     questionFields[key] = field.field;
     form.appendChild(field.label);
+
+    field.field.addEventListener("input", function () {
+      updateFormState();
+    });
   });
+
+  form.appendChild(answerStatus);
 
   var saveButton = makeElement("button", "", t("ui.submit_participant"));
   saveButton.type = "submit";
@@ -105,9 +174,7 @@ function renderParticipantForm() {
   var status = makeElement("div", "status muted", "");
   form.appendChild(status);
 
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
-
+  function buildPayload() {
     var payload = {
       role: roleInput.field.value.trim(),
       generation: generationInput.field.value.trim(),
@@ -119,6 +186,37 @@ function renderParticipantForm() {
       payload.answers[key] = questionFields[key].value.trim();
     });
 
+    return payload;
+  }
+
+  function updateFormState() {
+    var payload = buildPayload();
+    var hasEmptyProfile = !payload.role || !payload.generation || !payload.family_role;
+    var hasEmptyAnswer = Object.keys(payload.answers).some(function (key) {
+      return !payload.answers[key];
+    });
+
+    if (hasEmptyProfile || hasEmptyAnswer) {
+      answerStatus.textContent = "Ogni risposta deve contenere almeno " + getMinWordsPerAnswer() + " parole.";
+      saveButton.disabled = true;
+      return;
+    }
+
+    var validation = validateParticipantAnswers(payload);
+    answerStatus.textContent = validation.ok ? "" : validation.message;
+    saveButton.disabled = !validation.ok;
+  }
+
+  roleInput.field.addEventListener("change", updateFormState);
+  generationInput.field.addEventListener("change", updateFormState);
+  familyRoleInput.field.addEventListener("change", updateFormState);
+  updateFormState();
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    var payload = buildPayload();
+
     var hasEmptyProfile = !payload.role || !payload.generation || !payload.family_role;
     var hasEmptyAnswer = Object.keys(payload.answers).some(function (key) {
       return !payload.answers[key];
@@ -129,10 +227,27 @@ function renderParticipantForm() {
       return;
     }
 
+    var validation = validateParticipantAnswers(payload);
+    if (!validation.ok) {
+      showStatus(status, validation.message, true);
+      return;
+    }
+
     showStatus(status, t("ui.loading"), false);
 
     submitParticipant(payload)
       .then(function (result) {
+        if (result && result.validation_ok === false) {
+          var debugText = formatValidationDebug(result.validation_debug);
+          showStatus(
+            status,
+            (result.message || t("ui.messages.disengaged_input")) +
+              (debugText ? " | " + debugText : ""),
+            true
+          );
+          return;
+        }
+
         state.participantCount = result.participant_count;
         renderCheckpoint(result.message);
       })
@@ -146,6 +261,40 @@ function renderParticipantForm() {
   });
 
   panel.appendChild(form);
+  app.appendChild(panel);
+}
+
+function renderDisengagementScreen() {
+  clearElement(app);
+
+  var panel = makeElement("section", "panel stack");
+  panel.appendChild(makeElement("h2", "", t("ui.messages.disengaged_title")));
+  panel.appendChild(makeElement("p", "", t("ui.messages.disengaged_message_1")));
+  panel.appendChild(makeElement("p", "", t("ui.messages.disengaged_message_2")));
+  panel.appendChild(makeElement("p", "", t("ui.messages.disengaged_message_3")));
+
+  var row = makeElement("div", "row");
+  var interruptButton = makeElement("button", "", t("ui.messages.disengaged_interrupt"));
+  var restartButton = makeElement("button", "", t("ui.messages.disengaged_restart"));
+
+  interruptButton.addEventListener("click", function () {
+    clearElement(app);
+    var endPanel = makeElement("section", "panel stack");
+    endPanel.appendChild(makeElement("h2", "", "Sessione interrotta"));
+    endPanel.appendChild(
+      makeElement("p", "", "Grazie per aver partecipato. Puoi riavviare l'esperienza quando sarai pronto.")
+    );
+    var restartButton2 = makeElement("button", "", t("ui.restart"));
+    restartButton2.addEventListener("click", restartFlow);
+    endPanel.appendChild(restartButton2);
+    app.appendChild(endPanel);
+  });
+
+  restartButton.addEventListener("click", restartFlow);
+
+  row.appendChild(interruptButton);
+  row.appendChild(restartButton);
+  panel.appendChild(row);
   app.appendChild(panel);
 }
 
@@ -204,7 +353,15 @@ function renderResults(result) {
   var panel = makeElement("section", "panel stack");
   panel.appendChild(makeElement("h2", "", t("ui.analysis_title")));
 
-  panel.appendChild(
+  // (I grafici familiari verranno mostrati dopo i dettagli dei singoli partecipanti.)
+
+  
+
+  // INDIVIDUAL PARTICIPANTS - Sezione dettagli singoli
+  var panel2 = makeElement("section", "panel stack");
+  panel2.appendChild(makeElement("h3", "", "Dettagli Singoli Partecipanti"));
+
+  panel2.appendChild(
     makeElement(
       "p",
       "muted",
@@ -217,7 +374,7 @@ function renderResults(result) {
     var memberCard = makeElement("section", "panel stack member-card");
     memberCard.appendChild(
       makeElement(
-        "h3",
+        "h4",
         "",
         "Membro " +
           String(index + 1) +
@@ -252,7 +409,42 @@ function renderResults(result) {
 
     participantsWrap.appendChild(memberCard);
   });
-  panel.appendChild(participantsWrap);
+  panel2.appendChild(participantsWrap);
+  panel.appendChild(panel2);
+
+  // FAMILY AVERAGE RADARS - Medie per categoria
+  if (result.family_average_radar) {
+    var familyAverageSection = makeElement("section", "panel stack family-average-maps");
+    familyAverageSection.appendChild(
+      makeElement(
+        "h3",
+        "",
+        "Radar della Famiglia - Medie per categoria"
+      )
+    );
+    familyAverageSection.appendChild(
+      makeElement(
+        "p",
+        "muted",
+        "Questi quattro grafici mostrano la media dei punteggi per ciascuna categoria calcolata su tutti i membri della famiglia."
+      )
+    );
+
+    var familyAvgWrap = makeElement("div", "family-average-charts");
+    var groups = ["basic_emotions", "derived_emotions", "mental_states", "relational_needs"];
+    groups.forEach(function (groupKey) {
+      var data = (result.family_average_radar && result.family_average_radar[groupKey]) || {};
+      drawSpiderChart(
+        familyAvgWrap,
+        groupKey,
+        data,
+        "Media Famiglia - " + groupKey
+      );
+    });
+
+    familyAverageSection.appendChild(familyAvgWrap);
+    panel.appendChild(familyAverageSection);
+  }
 
   panel.appendChild(makeElement("h3", "", t("ui.shared_patterns_title")));
   var overlapList = makeElement("ul", "list");

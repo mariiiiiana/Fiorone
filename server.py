@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -179,6 +179,50 @@ def participant_radar_values(analysis: dict[str, Any]) -> dict[str, float]:
     return values
 
 
+def compute_family_radar_aggregates(participants: list[dict[str, Any]]) -> dict[str, float]:
+    """
+    Calcola i valori aggregati del radar per tutta la famiglia.
+    Ritorna la media dei valori radar per ogni categoria attraverso tutti i partecipanti.
+    """
+    if not participants:
+        return {
+            "basic_emotions": 0,
+            "derived_emotions": 0,
+            "mental_states": 0,
+            "relational_needs": 0,
+        }
+    
+    all_radar_values = [participant_radar_values(p["analysis"]) for p in participants]
+    
+    aggregated = {}
+    for group in ("basic_emotions", "derived_emotions", "mental_states", "relational_needs"):
+        values = [rv[group] for rv in all_radar_values]
+        aggregated[group] = round(sum(values) / len(values), 2)
+    
+    return aggregated
+
+
+def compute_family_radar_overlays(participants: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Prepara i dati del radar per ogni partecipante, da sovrapporre nello stesso grafico.
+    Ritorna una lista con i dati di ogni partecipante per il rendering sovrapposto.
+    """
+    overlay_data = []
+    for participant in participants:
+        radar_values = participant_radar_values(participant["analysis"])
+        overlay_data.append({
+            "id": participant["id"],
+            "role": participant["role"],
+            "generation": participant["generation"],
+            "family_role": participant["family_role"],
+            "basic_emotions": radar_values["basic_emotions"],
+            "derived_emotions": radar_values["derived_emotions"],
+            "mental_states": radar_values["mental_states"],
+            "relational_needs": radar_values["relational_needs"],
+        })
+    return overlay_data
+
+
 def average_group_maps(group_maps: list[dict[str, int]]) -> dict[str, float]:
     if not group_maps:
         return {}
@@ -256,6 +300,18 @@ async def call_ollama(prompt: str, system_prompt: str, response_format: Any | No
 
 
 def baseline_validation(answers: dict[str, str]) -> dict[str, Any]:
+    min_words = SETTINGS.get("min_words_per_answer", 10)
+
+    for key, answer_text in answers.items():
+        word_count = len(str(answer_text).split())
+        if word_count < min_words:
+            return {
+                "is_relevant": False,
+                "is_engaged": False,
+                "reason": f"min_words_violation: {key} has {word_count} words, needs {min_words}",
+            }
+
+    # Original checks
     answer_text = " ".join(answers.values()).strip()
     enough_text = len(answer_text) >= 40
     contains_letters = any(ch.isalpha() for ch in answer_text)
@@ -267,46 +323,48 @@ def baseline_validation(answers: dict[str, str]) -> dict[str, Any]:
     }
 
 
+def answers_meet_minimum_word_count(answers: dict[str, str]) -> tuple[bool, str]:
+    min_words = SETTINGS.get("min_words_per_answer", 10)
+    for key, answer_text in answers.items():
+        word_count = len(str(answer_text).split())
+        if word_count < min_words:
+            return False, f"min_words_violation: {key} has {word_count} words, needs {min_words}"
+    return True, ""
+
+
+def build_validation_debug(payload: dict[str, Any]) -> dict[str, Any]:
+    answers = payload.get("answers", {})
+    min_words = SETTINGS.get("min_words_per_answer", 10)
+    word_counts = {
+        key: len(str(value).split())
+        for key, value in answers.items()
+    }
+    return {
+        "role": payload.get("role", ""),
+        "generation": payload.get("generation", ""),
+        "family_role": payload.get("family_role", ""),
+        "question_keys": list(answers.keys()),
+        "word_counts": word_counts,
+        "min_words_per_answer": min_words,
+        "answers": answers,
+    }
+
+
 async def validate_participant_input(payload: dict[str, Any]) -> dict[str, Any]:
     answers = payload["answers"]
-    question_map = get_selected_questions()
-    variables = {
-        "role": payload["role"],
-        "generation": payload["generation"],
-        "family_role": payload["family_role"],
-        "question_misunderstood": question_map["misunderstood"],
-        "question_missing": question_map["missing"],
-        "question_wish": question_map["wish"],
-        "answers_json": json.dumps(answers, ensure_ascii=True),
-    }
-    prompt = format_prompt(SETTINGS["prompts"]["engagement_check_prompt"], variables)
-    system_prompt = SETTINGS["prompts"]["engagement_system_prompt"]
-    response_format = SETTINGS["response_schemas"]["engagement"]
-
-    try:
-        model_output = await call_ollama(prompt, system_prompt, response_format=response_format)
-        parsed = parse_json_from_text(model_output)
-
-        # If the model does not return the expected schema, fallback to local validation
-        # instead of rejecting the participant with a false 422.
-        if not parsed:
-            return baseline_validation(answers)
-
-        raw_relevant = parsed.get("is_relevant")
-        raw_engaged = parsed.get("is_engaged")
-        if not isinstance(raw_relevant, bool) or not isinstance(raw_engaged, bool):
-            return baseline_validation(answers)
-
-        is_relevant = raw_relevant
-        is_engaged = raw_engaged
-        reason = str(parsed.get("reason", ""))
+    meets_minimum, reason = answers_meet_minimum_word_count(answers)
+    if not meets_minimum:
         return {
-            "is_relevant": is_relevant,
-            "is_engaged": is_engaged,
+            "is_relevant": False,
+            "is_engaged": False,
             "reason": reason,
         }
-    except (httpx.HTTPError, json.JSONDecodeError, KeyError):
-        return baseline_validation(answers)
+
+    return {
+        "is_relevant": True,
+        "is_engaged": True,
+        "reason": "minimum_word_count_ok",
+    }
 
 
 def empty_analysis() -> dict[str, Any]:
@@ -485,12 +543,22 @@ class FeedbackRequest(BaseModel):
 app = FastAPI()
 
 
+@app.middleware("http")
+async def disable_client_cache(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
 @app.get("/app-config")
 async def app_config() -> dict[str, Any]:
     return {
         "ui": SETTINGS["ui"],
         "profile_options": SETTINGS.get("profile_options", {}),
         "questions": get_selected_questions(),
+        "min_words_per_answer": SETTINGS.get("min_words_per_answer", 10),
         "max_radar_charts": SETTINGS.get("max_radar_charts", 4),
     }
 
@@ -523,13 +591,15 @@ async def add_participant(request: ParticipantRequest) -> dict[str, Any]:
     validation = await validate_participant_input(payload)
     is_validation_ok = validation["is_relevant"] and validation["is_engaged"]
     if STRICT_ENGAGEMENT_VALIDATION and not is_validation_ok:
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "message": SETTINGS["ui"]["messages"]["disengaged_input"],
-                "reason": validation.get("reason", ""),
-            },
-        )
+        return {
+            "ok": False,
+            "validation_ok": False,
+            "participant_id": None,
+            "participant_count": len(CURRENT_SESSION["participants"]),
+            "message": SETTINGS["ui"]["messages"]["disengaged_input"],
+            "reason": validation.get("reason", ""),
+            "validation_debug": build_validation_debug(payload),
+        }
 
     analysis = await analyze_participant(payload)
     participant = {
@@ -597,12 +667,19 @@ async def finalize_analysis() -> dict[str, Any]:
     )
     write_history(history)
 
+    family_aggregate_overlays = compute_family_radar_overlays(participants)
+
+    # family_average contains per-label averages for each analysis group
+    family_average = aggregate
+
     return {
         "ok": True,
         "session_id": CURRENT_SESSION["session_id"],
         "participants": radar_participants,
         "patterns": patterns,
         "external_comparison": external_comparison,
+        "family_aggregate_radar": family_aggregate_overlays,
+        "family_average_radar": family_average,
         "max_radar_charts": SETTINGS.get("max_radar_charts", 4),
     }
 

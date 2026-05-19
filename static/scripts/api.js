@@ -3,7 +3,10 @@ function requestJson(path, options) {
     return response.text().then(function (text) {
       var data = text ? JSON.parse(text) : {};
       if (!response.ok) {
-        throw data;
+        var error = new Error(data.detail || "Request failed");
+        error.status = response.status;
+        error.data = data;
+        throw error;
       }
       return data;
     });
